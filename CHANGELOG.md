@@ -22,6 +22,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - nginx configuration generation and deployment
   - Comprehensive error handling and logging
 
+- **NGINX Auto-Installer** (`install-nginx.sh`)
+  - Multi-distribution support (Ubuntu, Debian, CentOS/RHEL, Rocky/Alma Linux)
+  - Automatic Linux distribution detection and appropriate installation method
+  - Official repository setup for latest stable NGINX versions
+  - GPG key verification and secure package installation
+  - Automatic service startup and boot configuration
+  - Comprehensive post-installation verification and testing
+  - Interactive user confirmation and detailed logging
+
 #### Features
 - **Metadata Service Integration**
   - Queries `http://metadata.tencentyun.com/latest/meta-data/` for instance information
@@ -130,11 +139,11 @@ N/A - Initial release
 
 ### 📊 Repository Statistics
 
-- **Total Utilities**: 1 (CVM Auto-Identifier)
-- **Lines of Code**: ~200 (CVM identifier)
-- **Documentation**: 3,000+ words across README and CHANGELOG
-- **Supported Regions**: All Tencent Cloud regions
-- **Target Platforms**: Ubuntu/Debian (primarily), CentOS/RHEL (compatible)
+- **Total Utilities**: 2 (CVM Auto-Identifier, NGINX Auto-Installer)
+- **Lines of Code**: ~400 total (~200 CVM identifier, ~200 NGINX installer)
+- **Documentation**: 4,000+ words across README and CHANGELOG
+- **Supported Regions**: All Tencent Cloud regions (CVM identifier)
+- **Target Platforms**: Ubuntu/Debian, CentOS/RHEL, Rocky/Alma Linux
 
 ### 🎯 Utility Breakdown
 
@@ -143,6 +152,12 @@ N/A - Initial release
 - **Dependencies**: curl, nginx
 - **Test Coverage**: Manual testing on multiple CVM instances
 - **Use Cases**: Load balancing, debugging, monitoring
+
+#### NGINX Auto-Installer
+- **Functions**: 4 main functions (3 distribution-specific installers + main)
+- **Dependencies**: curl, gpg, systemctl
+- **Supported Distributions**: Ubuntu, Debian, CentOS/RHEL, Rocky/Alma Linux
+- **Use Cases**: Server setup automation, development environment preparation
 
 ### 🙏 Acknowledgments
 

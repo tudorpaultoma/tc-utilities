@@ -15,6 +15,7 @@ This repository provides ready-to-use utilities for:
 ```
 tc-utilities/
 ├── simple-id-cvm.sh    # CVM identification utility
+├── install-nginx.sh    # NGINX auto-installer utility
 ├── README.md           # This documentation
 ├── CHANGELOG.md        # Version history
 └── LICENSE            # MIT license
@@ -39,6 +40,28 @@ curl -I http://localhost/  # Test the header
 ```
 
 **Use Cases**: Load balancer debugging, traffic analysis, instance monitoring
+
+---
+
+### 2. NGINX Auto-Installer (`install-nginx.sh`)
+
+**Purpose**: Automatically installs NGINX web server on various Linux distributions with proper configuration.
+
+**Features**:
+- Multi-distribution support (Ubuntu, Debian, CentOS/RHEL, Rocky/Alma Linux)
+- Official repository setup for latest stable versions
+- Automatic service configuration and startup
+- Post-installation verification and testing
+- Comprehensive error handling and logging
+
+**Usage**:
+```bash
+sudo ./install-nginx.sh
+# Follow interactive prompts
+curl http://localhost/  # Test installation
+```
+
+**Use Cases**: Server setup automation, development environment preparation, infrastructure provisioning
 
 ---
 
@@ -74,7 +97,10 @@ curl -I http://localhost/  # Test the header
 
 3. **Run any utility**:
    ```bash
-   # Example: CVM identifier
+   # Example: Install NGINX
+   sudo ./install-nginx.sh
+   
+   # Example: Configure CVM identification
    sudo ./simple-id-cvm.sh
    ```
 
@@ -121,6 +147,79 @@ for i in {1..5}; do curl -s -I http://your-lb-url/ | grep X-CVM-Info; done
 - Tencent Cloud CVM instance
 - nginx installed (`apt-get install nginx`)
 - Root/sudo access
+
+</details>
+
+### NGINX Auto-Installer
+
+<details>
+<summary><strong>Click to expand detailed documentation</strong></summary>
+
+#### Supported Distributions
+- **Ubuntu**: All LTS versions (18.04, 20.04, 22.04, 24.04)
+- **Debian**: Versions 9, 10, 11, 12 (Stretch, Buster, Bullseye, Bookworm)
+- **CentOS/RHEL**: Versions 7, 8, 9
+- **Enterprise Linux**: Oracle Linux, AlmaLinux, Rocky Linux
+
+#### Installation Methods
+| Distribution | Method | Repository |
+|--------------|--------|------------|
+| Ubuntu | apt-get | Ubuntu official repos |
+| Debian | apt + official NGINX repo | nginx.org packages |
+| CentOS/RHEL | yum/dnf + EPEL | EPEL repository |
+
+#### Features
+- **Automatic Detection**: Identifies Linux distribution and version
+- **Official Repositories**: Uses vendor-recommended package sources
+- **Security**: GPG key verification for package authenticity
+- **Service Management**: Automatic startup and boot configuration
+- **Verification**: Post-installation testing and validation
+
+#### Installation Process
+1. **Privilege Check**: Ensures root/sudo access
+2. **User Confirmation**: Interactive prompt before installation
+3. **Distribution Detection**: Identifies OS from `/etc/os-release`
+4. **Repository Setup**: Configures appropriate package repositories
+5. **Package Installation**: Installs NGINX and dependencies
+6. **Service Configuration**: Starts and enables NGINX service
+7. **Verification**: Tests installation and configuration
+
+#### Post-Installation Checks
+- ✓ Service running status
+- ✓ Boot startup configuration
+- ✓ NGINX version verification
+- ✓ Configuration file validation
+- ✓ Network port binding (port 80)
+
+#### Testing Commands
+```bash
+# Check service status
+systemctl status nginx
+
+# Test configuration
+nginx -t
+
+# View version
+nginx -v
+
+# Test web server
+curl http://localhost/
+
+# Check logs
+journalctl -u nginx
+```
+
+#### File Locations
+| Distribution | Config Directory | Document Root | Log Directory |
+|--------------|------------------|---------------|---------------|
+| Ubuntu/Debian | `/etc/nginx/` | `/var/www/html/` | `/var/log/nginx/` |
+| CentOS/RHEL | `/etc/nginx/` | `/usr/share/nginx/html/` | `/var/log/nginx/` |
+
+#### Requirements
+- Linux system with systemd
+- Root or sudo privileges
+- Internet connection for package downloads
+- Minimum 512MB RAM, 1GB disk space
 
 </details>
 
