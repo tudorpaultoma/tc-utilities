@@ -16,6 +16,7 @@ This repository provides ready-to-use utilities for:
 tc-utilities/
 ├── simple-id-cvm.sh    # CVM identification utility
 ├── install-nginx.sh    # NGINX auto-installer utility
+├── test-utilities.sh   # Comprehensive testing suite
 ├── README.md           # This documentation
 ├── CHANGELOG.md        # Version history
 └── LICENSE            # MIT license
@@ -102,6 +103,18 @@ curl http://localhost/  # Test installation
    
    # Example: Configure CVM identification
    sudo ./simple-id-cvm.sh
+   ```
+
+4. **Test the installation**:
+   ```bash
+   # Basic test
+   curl -I http://localhost/
+   
+   # Continuous monitoring (for load balancers)
+   while true; do curl -s -I http://your-domain.com/ | grep -i "X-CVM-Info" || date; sleep 0.5; done
+   
+   # Watch-based monitoring
+   watch -n0.5 'curl -s -I http://your-domain.com/ | grep X-CVM-Info'
    ```
 
 ## 📋 Utility Details
@@ -291,6 +304,229 @@ curl -s -I http://localhost/ | grep X-CVM-Info
 - Configure health checks to use utility-provided endpoints
 - Parse custom headers for traffic analysis
 - Implement zone-aware routing based on utility outputs
+
+## 🧪 Testing & Validation
+
+### CVM Auto-Identifier Testing
+
+#### Basic Header Testing
+```bash
+# Single request - check headers
+curl -I http://localhost/
+curl -I http://your-domain.com/
+
+# Single request - check specific header
+curl -s -I http://localhost/ | grep X-CVM-Info
+```
+
+#### Continuous Monitoring (Load Balancer Testing)
+```bash
+# Continuous monitoring with fallback on failure
+while true; do curl -s -I http://poc.fluffbits.com/ | grep -i "X-CVM-Info" || date; sleep 0.5; done
+
+# Watch-based continuous monitoring (cleaner output)
+watch -n0.5 'curl -s -I http://poc.fluffbits.com/ | grep X-CVM-Info'
+
+# Monitor multiple endpoints simultaneously
+watch -n1 'echo "=== Backend 1 ===" && curl -s -I http://backend1.example.com/ | grep X-CVM-Info; echo "=== Backend 2 ===" && curl -s -I http://backend2.example.com/ | grep X-CVM-Info'
+```
+
+#### Load Balancer Distribution Analysis
+```bash
+# Test load balancer distribution (collect 20 requests)
+for i in {1..20}; do 
+  curl -s -I http://your-lb-url/ | grep X-CVM-Info | awk '{print $2}' 
+  sleep 0.1
+done | sort | uniq -c
+
+# Advanced distribution analysis with timestamps
+for i in {1..50}; do 
+  echo "$(date '+%H:%M:%S') - $(curl -s -I http://your-lb-url/ | grep X-CVM-Info | awk '{print $2}')"
+  sleep 0.2
+done
+```
+
+#### Response Time Testing
+```bash
+# Test response time with CVM identification
+curl -w "CVM: %{header_x-cvm-info} | Time: %{time_total}s\n" -s -o /dev/null http://localhost/
+
+# Continuous response time monitoring
+while true; do
+  curl -w "$(date '+%H:%M:%S') | CVM: %{header_x-cvm-info} | Time: %{time_total}s\n" -s -o /dev/null http://your-domain.com/
+  sleep 1
+done
+```
+
+### NGINX Auto-Installer Testing
+
+#### Installation Verification
+```bash
+# Check NGINX service status
+systemctl status nginx
+
+# Verify NGINX is listening on port 80
+ss -tlnp | grep :80
+netstat -tlnp | grep :80
+
+# Test configuration syntax
+nginx -t
+
+# Check NGINX version
+nginx -v
+```
+
+#### Functionality Testing
+```bash
+# Basic connectivity test
+curl http://localhost/
+curl -I http://localhost/
+
+# Test default page
+curl -s http://localhost/ | grep -i "welcome\|nginx"
+
+# Check response headers
+curl -I http://localhost/ | grep -i server
+```
+
+#### Performance Testing
+```bash
+# Simple load test (requires apache2-utils)
+ab -n 1000 -c 10 http://localhost/
+
+# Alternative with curl (basic load test)
+for i in {1..100}; do
+  curl -s -w "%{http_code} %{time_total}s\n" -o /dev/null http://localhost/ &
+done
+wait
+```
+
+### Combined Testing (Both Utilities)
+
+#### End-to-End Workflow Test
+```bash
+# 1. Install NGINX
+sudo ./install-nginx.sh
+
+# 2. Configure CVM identification
+sudo ./simple-id-cvm.sh
+
+# 3. Verify both are working
+curl -I http://localhost/ | grep -E "(Server:|X-CVM-Info:)"
+
+# 4. Continuous monitoring
+watch -n1 'curl -s -I http://localhost/ | grep -E "(Server|X-CVM-Info)"'
+```
+
+#### Multi-Instance Testing
+```bash
+# Test multiple CVM instances (run on each instance)
+#!/bin/bash
+INSTANCES=("instance1.example.com" "instance2.example.com" "instance3.example.com")
+
+echo "Testing CVM identification across instances..."
+for instance in "${INSTANCES[@]}"; do
+  echo "=== $instance ==="
+  curl -s -I "http://$instance/" | grep X-CVM-Info || echo "No CVM info found"
+  echo ""
+done
+```
+
+### Troubleshooting Tests
+
+#### Connectivity Testing
+```bash
+# Test local connectivity
+curl -v http://localhost/
+
+# Test external connectivity
+curl -v http://your-domain.com/
+
+# Test with specific timeout
+curl --connect-timeout 5 --max-time 10 http://localhost/
+```
+
+#### Header Analysis
+```bash
+# View all response headers
+curl -D - -s -o /dev/null http://localhost/
+
+# Check for specific headers
+curl -s -I http://localhost/ | grep -i "x-cvm\|server\|content-type"
+
+# Test different HTTP methods
+curl -X GET -I http://localhost/
+curl -X HEAD -I http://localhost/
+```
+
+#### Log Monitoring
+```bash
+# Monitor NGINX access logs in real-time
+tail -f /var/log/nginx/access.log
+
+# Monitor NGINX error logs
+tail -f /var/log/nginx/error.log
+
+# Monitor system logs for NGINX
+journalctl -u nginx -f
+```
+
+### Performance Monitoring
+
+#### Resource Usage
+```bash
+# Monitor NGINX process
+top -p $(pgrep nginx)
+htop -p $(pgrep nginx)
+
+# Check memory usage
+ps aux | grep nginx
+
+# Monitor network connections
+ss -tulpn | grep nginx
+```
+
+#### Automated Testing Script
+```bash
+#!/bin/bash
+# Comprehensive testing script
+
+echo "=== CVM Auto-Identifier Test Suite ==="
+
+# Test 1: Basic functionality
+echo "Test 1: Basic header check"
+if curl -s -I http://localhost/ | grep -q "X-CVM-Info"; then
+    echo "✓ PASSED: CVM header found"
+    curl -s -I http://localhost/ | grep "X-CVM-Info"
+else
+    echo "✗ FAILED: CVM header not found"
+fi
+
+# Test 2: Response time
+echo -e "\nTest 2: Response time check"
+RESPONSE_TIME=$(curl -w "%{time_total}" -s -o /dev/null http://localhost/)
+echo "Response time: ${RESPONSE_TIME}s"
+
+# Test 3: Service status
+echo -e "\nTest 3: Service status"
+if systemctl is-active nginx >/dev/null; then
+    echo "✓ PASSED: NGINX service is running"
+else
+    echo "✗ FAILED: NGINX service is not running"
+fi
+
+# Test 4: Configuration validity
+echo -e "\nTest 4: Configuration check"
+if nginx -t >/dev/null 2>&1; then
+    echo "✓ PASSED: NGINX configuration is valid"
+else
+    echo "✗ FAILED: NGINX configuration has errors"
+fi
+
+echo -e "\n=== Test Suite Complete ==="
+```
+
+Save this as `test-utilities.sh` and run with `bash test-utilities.sh`
 
 ## 🛣️ Roadmap
 
