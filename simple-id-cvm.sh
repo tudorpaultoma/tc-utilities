@@ -6,11 +6,11 @@
 # 
 # Purpose: Automatically identifies Tencent Cloud CVM instance details and 
 #          configures nginx to respond with a single header containing:
-#          Zone | IP | Instance-ID
+#          Zone | IP | Instance-ID | Timestamp
 #
 # Usage:   sudo ./simple-id-cvm.sh
 #
-# Output:  X-CVM-Info header with format: "ap-singapore-1 | 10.0.0.100 | ins-abc123"
+# Output:  X-CVM-Info header with format: "ap-singapore-1 | 10.0.0.100 | ins-abc123 | 2024-11-05 14:30:25 UTC"
 #
 # Author:  Auto-generated for CVM identification
 # Version: 1.0
@@ -139,12 +139,14 @@ main() {
     local cvm_ip=$(get_cvm_ip)
     local availability_zone=$(get_availability_zone)
     local instance_id=$(get_instance_id)
+    local current_timestamp=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
     
     # Display detected information
     log "CVM Information Detected:"
     log "  IP Address: $cvm_ip"
     log "  Availability Zone: $availability_zone"
     log "  Instance ID: $instance_id"
+    log "  Timestamp: $current_timestamp"
     
     #--------------------------------------------------------------------------
     # CLEANUP OLD CONFIGURATIONS
@@ -172,21 +174,21 @@ server {
     server_name _;
     
     # Primary identification header - visible in all responses
-    # Format: "availability-zone | ip-address | instance-id"
-    add_header X-CVM-Info "$availability_zone | $cvm_ip | $instance_id" always;
+    # Format: "availability-zone | ip-address | instance-id | timestamp"
+    add_header X-CVM-Info "$availability_zone | $cvm_ip | $instance_id | $current_timestamp" always;
     
     # Default location - returns CVM info as plain text
     location / {
-        return 200 "CVM: $availability_zone | $cvm_ip | $instance_id\\n";
+        return 200 "CVM: $availability_zone | $cvm_ip | $instance_id | $current_timestamp\\n";
         add_header Content-Type "text/plain" always;
-        add_header X-CVM-Info "$availability_zone | $cvm_ip | $instance_id" always;
+        add_header X-CVM-Info "$availability_zone | $cvm_ip | $instance_id | $current_timestamp" always;
     }
     
     # Health check endpoint for load balancers
     location /health {
         return 200 "OK";
         add_header Content-Type "text/plain" always;
-        add_header X-CVM-Info "$availability_zone | $cvm_ip | $instance_id" always;
+        add_header X-CVM-Info "$availability_zone | $cvm_ip | $instance_id | $current_timestamp" always;
     }
 }
 EOF
@@ -206,7 +208,7 @@ EOF
         
         # Success message with header format
         log "SUCCESS! CVM identification configured"
-        log "Header format: X-CVM-Info: $availability_zone | $cvm_ip | $instance_id"
+        log "Header format: X-CVM-Info: $availability_zone | $cvm_ip | $instance_id | $current_timestamp"
         
     else
         log "ERROR: nginx configuration syntax validation failed"

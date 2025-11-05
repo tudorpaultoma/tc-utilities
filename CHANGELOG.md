@@ -5,6 +5,29 @@ All notable changes to the Tencent Cloud Utilities project will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2024-11-05
+
+### 🔄 Enhanced CVM Auto-Identifier
+
+#### Changed
+- **[CVM Auto-Identifier] Enhanced Header Format** 
+  - Added timestamp to X-CVM-Info header
+  - New format: `X-CVM-Info: zone | ip | instance-id | timestamp`
+  - Timestamp in UTC format: "2024-11-05 14:30:25 UTC"
+  - Provides configuration freshness tracking
+
+#### Updated
+- **Documentation** - Updated README and testing examples for new header format
+- **Testing Script** - Enhanced test-utilities.sh to validate 4-component header format
+- **Examples** - Updated all testing commands and examples
+
+#### Benefits
+- **Configuration Tracking** - Know when CVM identification was last configured
+- **Debugging** - Easier to identify stale configurations
+- **Monitoring** - Track configuration deployment times across instances
+
+---
+
 ## [1.0.0] - 2024-11-05
 
 ### 🎉 Initial Release - Utilities Repository
@@ -17,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Utilities Added
 - **CVM Auto-Identifier** (`simple-id-cvm.sh`)
   - Automatic detection of CVM IP address, availability zone, and instance ID
-  - Single header output format: `X-CVM-Info: zone | ip | instance-id`
+  - Single header output format: `X-CVM-Info: zone | ip | instance-id | timestamp`
   - Integration with Tencent Cloud metadata service
   - nginx configuration generation and deployment
   - Comprehensive error handling and logging

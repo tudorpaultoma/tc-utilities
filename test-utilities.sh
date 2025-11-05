@@ -128,16 +128,18 @@ test_cvm_identification() {
         local zone=$(echo "$header_value" | cut -d'|' -f1 | xargs)
         local ip=$(echo "$header_value" | cut -d'|' -f2 | xargs)
         local instance=$(echo "$header_value" | cut -d'|' -f3 | xargs)
+        local timestamp=$(echo "$header_value" | cut -d'|' -f4 | xargs)
         
         print_status "INFO" "Zone: $zone"
         print_status "INFO" "IP: $ip"
         print_status "INFO" "Instance: $instance"
+        print_status "INFO" "Timestamp: $timestamp"
         
         # Validate format
-        if [[ "$header_value" == *"|"*"|"* ]]; then
-            print_status "PASS" "Header format is correct (zone | ip | instance)"
+        if [[ "$header_value" == *"|"*"|"*"|"* ]]; then
+            print_status "PASS" "Header format is correct (zone | ip | instance | timestamp)"
         else
-            print_status "WARN" "Header format may be incorrect"
+            print_status "WARN" "Header format may be incorrect (expected 4 components separated by |)"
         fi
     else
         print_status "FAIL" "CVM identification header not found"

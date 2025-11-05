@@ -29,10 +29,11 @@ tc-utilities/
 **Purpose**: Automatically identifies CVM instances and configures nginx with identification headers.
 
 **Features**:
-- Single header output: `X-CVM-Info: zone | ip | instance-id`
+- Single header output: `X-CVM-Info: zone | ip | instance-id | timestamp`
 - Automatic detection via metadata service
 - Load balancer friendly for backend identification
 - Health check endpoint included
+- Timestamp tracking for configuration freshness
 
 **Usage**:
 ```bash
@@ -125,13 +126,13 @@ curl http://localhost/  # Test installation
 <summary><strong>Click to expand detailed documentation</strong></summary>
 
 #### Output Format
-Creates a single header: `X-CVM-Info: availability-zone | ip-address | instance-id`
+Creates a single header: `X-CVM-Info: availability-zone | ip-address | instance-id | timestamp`
 
-**Example**: `X-CVM-Info: ap-singapore-1 | 10.0.0.100 | ins-abc123def`
+**Example**: `X-CVM-Info: ap-singapore-1 | 10.0.0.100 | ins-abc123def | 2024-11-05 14:30:25 UTC`
 
 #### How It Works
 1. Queries Tencent Cloud metadata service
-2. Retrieves availability zone, IP address, and instance ID  
+2. Retrieves availability zone, IP address, instance ID, and timestamp  
 3. Generates nginx configuration with identification header
 4. Validates and deploys the configuration
 
@@ -333,9 +334,9 @@ watch -n1 'echo "=== Backend 1 ===" && curl -s -I http://backend1.example.com/ |
 
 #### Load Balancer Distribution Analysis
 ```bash
-# Test load balancer distribution (collect 20 requests)
+# Test load balancer distribution (collect 20 requests) 
 for i in {1..20}; do 
-  curl -s -I http://your-lb-url/ | grep X-CVM-Info | awk '{print $2}' 
+  curl -s -I http://your-lb-url/ | grep X-CVM-Info | awk '{print $2}' | cut -d'|' -f1-3
   sleep 0.1
 done | sort | uniq -c
 
